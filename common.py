@@ -4,17 +4,20 @@ import requests
 headers = {"Authorization": "bearer " + "",
            "User-Agent": "Ubuntu:predText:v1"}
 
-
+#used to confirm duplicate comments are not saved
 def uniqueID(commentsdb, id):
     for comment in commentsdb:
         if comment['data']['id'] == id:
             return False
     return True
 
-
+#returns the specified amount of reddit objects from the specified url
 def DownloadThings(url, count):
+    #force https
     if not url.startswith("http"):
         url = "http://" + url
+    
+    #if a "?" ia already in the url, then use "&" instead
     if "?" in url:
         seperator = "&"
     else:
@@ -22,6 +25,8 @@ def DownloadThings(url, count):
     after = ""
     result = []
     c = 0
+
+    #download pages of data until enough are collected
     while c < count:
         time.sleep(0.5)
         page = requests.get(
@@ -30,6 +35,8 @@ def DownloadThings(url, count):
         after = pagedata['data']['after']
         posts = pagedata['data']['children']
         l = len(posts)
+
+        #if there is no "after" data, start again from the begining
         if not l > 0 or after is None:
             after = ""
         for post in posts:
@@ -37,10 +44,11 @@ def DownloadThings(url, count):
                 result.append(post)
                 c = c + 1
         print("Downloaded " + str(c) + " out of " + str(count))
-    result.sort(key=lambda x: x['data']['id'])
+    result.sort(key=lambda x: x['data']['id']) #sord by id
     return result
 
 
+#removes most non-alphanumeric characters, whitespace, and reduces multiple spaces to one space 
 def sanitize(string):
     result = ""
     string = string.replace("\r", " ")
@@ -63,7 +71,7 @@ def sanitize(string):
         result = result.replace("  ", " ")
     return result
 
-
+#used to detect slurs in downloaded data
 def hasslur(string):
     for slur in slurs2:
         if slur in sanitize(string):
@@ -72,7 +80,6 @@ def hasslur(string):
 
 
 # This is a vulgar variable. It's defined so that these words can be filtered out of content
-
 slurs2 = ["abbie", "abie", "abid", "abeed", "abbo", "afro", "alibaba", "gatorbait", "annamite", "aseng", "arabush", "auntjemima",
           "ayrab", "bamboula", "beaner", "beaney", "bluegum", "boche", "bosch", "bogtrotter", "bohunk", "boong", "bung", "bong", "boong", "bunga", "boonie", "bootlip", "boungoule", "bountybar", "bozgor", "brownie", "buddahead", "bule", "cameljockey", "chankoro", "cheesehead", "cheeseeatingsurrendermonkey", "chefur", "chernozhopy", "chilote", "chinaman", "chink", "churka", "chonky", "christkiller", "chocice", "cina", "cokin", "coolie", "coonass", "cracker", "currymuncher", "cushi", "kushi", "dago", "dego", "dalkhor", "darky", "darkey", "darkie",
           "dink", "dogan", "dogun", "dothead", "dunecoon", "eyetie", "farang", "fenian", "feuj", "fritz", "frogeater", "fuzzywuzzy", "gabacho", "gaijin", "gammon",
@@ -80,8 +87,5 @@ slurs2 = ["abbie", "abie", "abid", "abeed", "abbo", "afro", "alibaba", "gatorbai
           "heeb", "hibe", "hillbilly", "honky", "honkey", "honkie", "hunky", "hymie", "ikey", "iky", "ikeymo", "indon", "indonesia", "injun",
           "jakun", "japie", "yarpie", "jerry", "jewboy", "jigaboo", "jiggaboo", "jigarooni", "jijiboo", "zigaboo", "jigg", "jigga", "jigger", "jocky", "jockie", "jungle bunny", "kaffir", "kaffer", "kaffir", "kafir", "kaffre", "kuffar", "kalar", "kalia", "kalu", "kallu", "kanaka", "kanke", "kano", "katsap", "kacap", "kacapas", "kaouiche", "kawish", "kebab", "keling", "kharkhuwa", "khokhol", "kike", "kyke", "kimichi", "knacker", "kolorad", "kraut", "labas", "laowai", "lebo", "limey", "lubra", "lugan", "mabuno", "mahbuno", "macaca", "majus", "malakhkhor", "malaun", "malon", "malingsia", "malingsial", "malingsialan", "maumau", "mick", "mooncricket", "moskal", "mulignan", "mulignon", "moolinyan", "munt", "mzungu", "nawar", "niakou", "niglet", "nignog", "nigger", "nigor", "nigra", "nigre", "nigar", "niggur", "nigga", "niggah", "niggar", "nigguh", "nigress", "nigette", "nitchie", "neche", "neechee", "neejee", "nicji", "nichiwa", "nidge", "nitchee", "nitchy", "nonpri", "monkey", "nusayri", "olah", "overner", "paddy", "paki", "palagi", "paleface", "peckerwood", "piefke", "pickaninny", "pikey", "piky", "piker", "pocho", "pocha", "polak", "polack", "polock", "polaco", "polentone", "pohm", "pommy",
           "pommie", "portagee", "pshek", "quashie", "raghead", "rastus", "razakara", "redlegs", "redneck", "redskin", "rosuke", "roske", "rooinek", "roundeye", "rusnya", "sambo", "sandnigger", "sassenach", "sawney", "scandihoovian", "seppo", "schvartse", "schwartze", "sheeny", "shegetz", "shelta", "shiksa",
-          "shiptar", "shkije", "shkutzim", "shylock", "skopianoi", "slanteye", "slopehead", "slopy", "slopey", "sloper", "soosmarkhor", "sooty", "sourpeil", "spearchunker", "squarehead", "squaw", "tacohead", "tiag", "tarbaby", "terrone", "teuchter", "thicklip", "tingtong", "towelhead", "uncle tom", "vatnik", "wetback", "wigger", "whigger", "whitey", "wog", "wop", "yam yam", "yank", "yellow bone", "zipperhead"]
-
-wholewords = ["pom", "ike", "russi", "arab", "nig", "ann", "gin", "abo", "jap",
-              "ching", "chong", "hun", "nip", "ape", "armo", "haji", "coon", "chee", "crow",
-              "hori", "chug","nere","burr", "cholo","gans"]
+          "shiptar", "shkije", "shkutzim", "shylock", "skopianoi", "slanteye", "slopehead", "slopy", "slopey", "sloper", "soosmarkhor", "sooty", "sourpeil", "spearchunker", "squarehead", "squaw", "tacohead", "tiag", "tarbaby", "terrone", "teuchter", "thicklip", "tingtong", "towelhead", "uncle tom", "vatnik", "wetback", "wigger", "whigger", "whitey", "wog", "wop", "yam yam", "yank", "yellow bone", "zipperhead","pom", "ike", "russi", "arab", "nig", "ann", "gin", "abo", "jap",
+"ching", "chong", "hun", "nip", "ape", "armo", "haji", "coon", "chee", "crow","hori", "chug","nere","burr", "cholo","gans"]
