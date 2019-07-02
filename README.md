@@ -1,4 +1,4 @@
-# predText
+# PredText
 A predictive text algorithm using machine learning via Markov Chains.
 Input data is taken from Reddit.com's newest comments (old.reddit.com/r/all/comments/), then each sentence is analyzed and each word is put in a dictionary. This dictionary keeps track of which words are most likely to come after two root words, allowing for vaguely coherent sentence structures.
 ## Installation
